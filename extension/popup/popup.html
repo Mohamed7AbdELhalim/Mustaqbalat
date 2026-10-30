@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مستقبلات للراحة البصرية</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="top-bar">
+      <div class="brand">
+        <img src="../icons/icon32.png" alt="مستقبلات" class="brand-icon" />
+        <div>
+          <h1>مستقبلات</h1>
+          <span class="subtitle">للراحة البصرية وتعتيم الشاشة</span>
+        </div>
+      </div>
+      <label class="master-switch" title="تشغيل افتراضي على جميع الصفحات والملفات">
+        <input type="checkbox" id="globalEnabledToggle" checked />
+        <span class="slider-pill"></span>
+        <span class="switch-label" id="globalStateText">مفعّل للكل</span>
+      </label>
+    </header>
+
+    <!-- Active Site Strip -->
+    <section class="site-strip" id="siteStrip">
+      <div class="site-info">
+        <span class="site-dot" id="siteDot"></span>
+        <span class="site-host" id="currentHostLabel">كل المواقع</span>
+        <span class="pdf-badge" id="pdfDetectedBadge" hidden>PDF</span>
+      </div>
+      <div class="site-actions">
+        <button type="button" class="btn-xs" id="toggleSiteExcludeBtn" title="تعطيل أو تفعيل الأداة على هذا الموقع فقط">
+          تعطيل بالموقع
+        </button>
+        <button type="button" class="btn-xs btn-warn" id="quickReportSiteBtn" title="الإبلاغ بأن الإضافة لم تعمل على هذا الموقع">
+          لم تعمل؟
+        </button>
+      </div>
+    </section>
+
+    <!-- Restricted browser page notice -->
+    <div class="restricted-banner" id="restrictedBanner" hidden>
+      <strong>تنبيه:</strong> <span id="restrictedReasonText">هذه الصفحة تمنع عمل الإضافات من المتصفح.</span>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-nav" role="tablist">
+      <button type="button" class="tab-btn active" data-tab="controls">السطوع والطبقات</button>
+      <button type="button" class="tab-btn" data-tab="colors">الألوان HEX</button>
+      <button type="button" class="tab-btn" data-tab="usage">الاستهلاك</button>
+      <button type="button" class="tab-btn" data-tab="github">جيت هاب</button>
+    </nav>
+
+    <!-- TAB 1: Brightness, Overlay Layers, Dark Mode & PDF -->
+    <main class="tab-panel active" id="tab-controls">
+      <div class="card">
+        <div class="control-header">
+          <label for="brightnessRange">سطوع الشاشة (تقليل / زيادة)</label>
+          <span class="val-badge" id="brightnessVal">88%</span>
+        </div>
+        <input type="range" id="brightnessRange" min="20" max="150" value="88" />
+        <div class="quick-Chips">
+          <button type="button" class="preset-chip" data-brightness="55">ليلي 55%</button>
+          <button type="button" class="preset-chip" data-brightness="75">هادئ 75%</button>
+          <button type="button" class="preset-chip" data-brightness="88">مريح 88%</button>
+          <button type="button" class="preset-chip" data-brightness="100">طبيعي 100%</button>
+          <button type="button" class="preset-chip" data-brightness="125">زيادة +125%</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="control-header">
+          <label for="overlayRange">طبقة تعتيم فوق الموقع (Overlay Layer)</label>
+          <span class="val-badge" id="overlayVal">14%</span>
+        </div>
+        <input type="range" id="overlayRange" min="0" max="85" value="14" />
+
+        <div class="row-2col mt-8">
+          <div>
+            <label class="mini-label" for="methodSelect">آلية خفض السطوع</label>
+            <select id="methodSelect" class="select-input">
+              <option value="hybrid">دمج ذكي (طبقات + فلتر)</option>
+              <option value="overlay">طبقات فوق الموقع فقط</option>
+              <option value="filter">فلتر ألوان الصفحة فقط</option>
+            </select>
+          </div>
+          <div>
+            <label class="mini-label" for="darkModeSelect">الوضع الداكن لأي صفحة</label>
+            <select id="darkModeSelect" class="select-input">
+              <option value="off">معطّل (الألوان الأصلية)</option>
+              <option value="smart">داكن ذكي (يحفظ الصور)</option>
+              <option value="warm-dark">داكن دافئ للقراءة</option>
+              <option value="amoled">داكن عميق AMOLED</option>
+              <option value="pdf-dark">داكن مخصص لملفات PDF</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row-2col">
+          <div>
+            <div class="control-header">
+              <label for="pageColorDimRange">تخفيف وهج الأبيض</label>
+              <span class="val-badge" id="pageColorDimVal">8%</span>
+            </div>
+            <input type="range" id="pageColorDimRange" min="0" max="60" value="8" />
+          </div>
+          <div>
+            <div class="control-header">
+              <label for="contrastRange">تباين النص</label>
+              <span class="val-badge" id="contrastVal">100%</span>
+            </div>
+            <input type="range" id="contrastRange" min="50" max="150" value="100" />
+          </div>
+        </div>
+      </div>
+
+      <!-- PDF Section -->
+      <div class="card pdf-card">
+        <div class="flex-between">
+          <div>
+            <strong class="card-title">دعم وتعتيم ملفات PDF</strong>
+            <p class="hint-text">يطبّق طبقات التعتيم والوضع الداكن على ملفات PDF المفتوحة</p>
+          </div>
+          <input type="checkbox" id="pdfEnabledCheck" class="accent-check" checked />
+        </div>
+        <div class="control-header mt-6">
+          <label for="pdfExtraDimRange">تعتيم إضافي لبياض صفحات PDF</label>
+          <span class="val-badge" id="pdfExtraDimVal">10%</span>
+        </div>
+        <input type="range" id="pdfExtraDimRange" min="0" max="50" value="10" />
+        <button type="button" class="btn-secondary full-width mt-8" id="openPdfViewerBtn">
+          📄 فتح قارئ ومعتّم ملفات PDF المدمج (بدون تثبيت)
+        </button>
+      </div>
+    </main>
+
+    <!-- TAB 2: Advanced Screen Color & HEX Tools -->
+    <main class="tab-panel" id="tab-colors">
+      <div class="card">
+        <div class="flex-between">
+          <strong class="card-title">طبقة تلوين الشاشة المتقدمة (HEX & Wheel)</strong>
+          <label class="inline-toggle">
+            <input type="checkbox" id="tintEnabledCheck" class="accent-check" />
+            <span>تفعيل اللون</span>
+          </label>
+        </div>
+
+        <div class="color-studio-grid mt-8">
+          <div class="wheel-wrap">
+            <canvas id="colorWheelCanvas" width="132" height="132" title="اختر أي لون من عجلة الألوان"></canvas>
+          </div>
+          <div class="hex-controls">
+            <label class="mini-label" for="hexInput">كود اللون السداسي (HEX)</label>
+            <div class="hex-input-row">
+              <input type="text" id="hexInput" value="#F59E0B" maxlength="7" dir="ltr" spellcheck="false" />
+              <input type="color" id="nativeColorPicker" value="#F59E0B" title="لوحة ألوان النظام" />
+              <button type="button" class="btn-icon" id="eyeDropperBtn" title="التقاط أي لون من الشاشة">💧</button>
+            </div>
+
+            <label class="mini-label mt-6" for="tintOpacityRange">
+              شدة اللون: <b id="tintOpacityVal">18%</b>
+            </label>
+            <input type="range" id="tintOpacityRange" min="0" max="80" value="18" />
+
+            <label class="mini-label mt-6" for="tintBlendSelect">نمط دمج الطبقة</label>
+            <select id="tintBlendSelect" class="select-input">
+              <option value="multiply">مضاعفة مريحة (Multiply)</option>
+              <option value="soft-light">إضاءة ناعمة (Soft Light)</option>
+              <option value="darken">تعتيم لوني (Darken)</option>
+              <option value="color">صبغة لونية (Color)</option>
+              <option value="normal">طبقة شفافة مباشرة (Normal)</option>
+              <option value="screen">تفتيح لوني (Screen)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- RGB Sliders -->
+        <div class="rgb-bars mt-8">
+          <div class="rgb-row">
+            <span class="rgb-tag r">R</span>
+            <input type="range" id="rgbR" min="0" max="255" value="245" />
+            <span class="rgb-num" id="rgbRVal">245</span>
+          </div>
+          <div class="rgb-row">
+            <span class="rgb-tag g">G</span>
+            <input type="range" id="rgbG" min="0" max="255" value="158" />
+            <span class="rgb-num" id="rgbGVal">158</span>
+          </div>
+          <div class="rgb-row">
+            <span class="rgb-tag b">B</span>
+            <input type="range" id="rgbB" min="0" max="255" value="11" />
+            <span class="rgb-num" id="rgbBVal">11</span>
+          </div>
+        </div>
+
+        <!-- Swatch Presets -->
+        <div class="mt-8">
+          <span class="mini-label">لوحات الراحة البصرية الجاهزة:</span>
+          <div class="swatches-grid" id="swatchesContainer"></div>
+        </div>
+      </div>
+
+      <!-- Website Underlying Color Controls -->
+      <div class="card">
+        <strong class="card-title">التحكم بألوان عناصر الصفحة نفسها</strong>
+        <div class="control-header mt-6">
+          <label for="warmthRange">دفء الألوان وتصفية الضوء الأزرق</label>
+          <span class="val-badge" id="warmthVal">12%</span>
+        </div>
+        <input type="range" id="warmthRange" min="0" max="100" value="12" />
+
+        <div class="row-2col mt-6">
+          <div>
+            <div class="control-header">
+              <label for="saturationRange">تشبع الألوان</label>
+              <span class="val-badge" id="saturationVal">100%</span>
+            </div>
+            <input type="range" id="saturationRange" min="0" max="150" value="100" />
+          </div>
+          <div>
+            <div class="control-header">
+              <label for="hueRotateRange">تدوير طيف اللون</label>
+              <span class="val-badge" id="hueRotateVal">0°</span>
+            </div>
+            <input type="range" id="hueRotateRange" min="-180" max="180" value="0" />
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 3: Live In-Page Resource Monitor & Days/Weeks History -->
+    <main class="tab-panel" id="tab-usage">
+      <div class="card">
+        <div class="flex-between">
+          <div>
+            <strong class="card-title">مؤشر الاستهلاك المباشر داخل الصفحة</strong>
+            <p class="hint-text">يعرض خفة الأداة واستهلاكها الفوري أثناء التصفح</p>
+          </div>
+          <input type="checkbox" id="showHudCheck" class="accent-check" checked />
+        </div>
+
+        <div class="row-2col mt-6">
+          <div>
+            <label class="mini-label" for="hudPosSelect">موقع المؤشر في الصفحة</label>
+            <select id="hudPosSelect" class="select-input">
+              <option value="bottom-left">أسفل اليسار</option>
+              <option value="bottom-right">أسفل اليمين</option>
+              <option value="top-left">أعلى اليسار</option>
+              <option value="top-right">أعلى اليمين</option>
+            </select>
+          </div>
+          <div class="flex-end">
+            <button type="button" class="btn-xs full-width" id="refreshTelemetryBtn">↻ تحديث القياس الآن</button>
+          </div>
+        </div>
+
+        <div class="metrics-grid mt-8">
+          <div class="metric-box">
+            <span class="m-label">ذاكرة الأداة بالصفحة</span>
+            <strong class="m-val" id="liveFootprintKB">18 KB</strong>
+          </div>
+          <div class="metric-box">
+            <span class="m-label">زمن المعالجة (CPU)</span>
+            <strong class="m-val" id="liveApplyMs">0.24 ms</strong>
+          </div>
+          <div class="metric-box">
+            <span class="m-label">معدل الإطارات</span>
+            <strong class="m-val" id="liveFps">60 FPS</strong>
+          </div>
+          <div class="metric-box">
+            <span class="m-label">عناصر الطبقات (DOM)</span>
+            <strong class="m-val" id="liveDomNodes">6 عناصر</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex-between">
+          <strong class="card-title">سجل الاستهلاك (أيام وأسابيع)</strong>
+          <div class="seg-group">
+            <button type="button" class="seg-btn active" data-range="7d">7 أيام</button>
+            <button type="button" class="seg-btn" data-range="4w">4 أسابيع</button>
+          </div>
+        </div>
+
+        <canvas id="miniUsageChart" width="330" height="115" class="mt-6"></canvas>
+
+        <div class="summary-strip mt-6">
+          <div><span>إجمالي التفعيل:</span> <b id="sumActiveTime">0 د</b></div>
+          <div><span>متوسط الذاكرة:</span> <b id="sumAvgMem">18 KB</b></div>
+          <div><span>صفحات / PDF:</span> <b id="sumPagesCount">1</b></div>
+        </div>
+
+        <button type="button" class="btn-primary full-width mt-8" id="openDashboardBtn">
+          📊 فتح لوحة الاستهلاك التفصيلية (الأيام والأسابيع)
+        </button>
+      </div>
+    </main>
+
+    <!-- TAB 4: GitHub Issues & Incompatible Websites -->
+    <main class="tab-panel" id="tab-github">
+      <div class="card">
+        <strong class="card-title">ربط GitHub لبلاغات المشكلات والمواقع</strong>
+        <label class="mini-label mt-6" for="githubRepoInput">مستودع GitHub المرتبط (Owner/Repo)</label>
+        <input type="text" id="githubRepoInput" class="text-input" dir="ltr" value="Mohamed7AbdELhalim/Mustaqbalat" />
+
+        <label class="mini-label mt-6" for="issueTypeSelect">نوع البلاغ</label>
+        <select id="issueTypeSelect" class="select-input">
+          <option value="site-incompatible">🌐 موقع لم تعمل معه الإضافة / رفض الاستجابة</option>
+          <option value="bug-report">🐛 مشكلة تقنية واجهتني في الأداة</option>
+          <option value="feature-request">💡 اقتراح تحسين أو ميزة جديدة</option>
+        </select>
+
+        <label class="mini-label mt-6" for="issueSiteUrlInput">رابط الموقع أو ملف PDF</label>
+        <input type="text" id="issueSiteUrlInput" class="text-input" dir="ltr" placeholder="https://example.com" />
+
+        <label class="mini-label mt-6" for="issueDescInput">وصف المشكلة أو السلوك الملاحظ</label>
+        <textarea id="issueDescInput" class="textarea-input" rows="3" placeholder="مثال: الصفحة بقيت ساطعة أو عنصر الفيديو لم يتأثر بالطبقة..."></textarea>
+
+        <details class="mt-6 token-details">
+          <summary>إرسال مباشر عبر GitHub API (اختياري بدون مغادرة النافذة)</summary>
+          <input type="password" id="githubTokenInput" class="text-input mt-6" dir="ltr" placeholder="ghp_... (اختياري - اتركه فارغاً للفتح المباشر)" />
+        </details>
+
+        <div class="btn-row mt-8">
+          <button type="button" class="btn-primary" id="submitGithubIssueBtn">
+            🚀 إرسال إلى GitHub Issues
+          </button>
+          <button type="button" class="btn-secondary" id="logBrokenSiteLocalBtn">
+            📌 حفظ واستثناء الموقع
+          </button>
+        </div>
+        <p class="status-msg" id="githubStatusMsg" hidden></p>
+      </div>
+
+      <div class="card">
+        <div class="flex-between">
+          <strong class="card-title">سجل المواقع المبلّغ عنها / المستثناة</strong>
+          <span class="val-badge" id="brokenCountBadge">0</span>
+        </div>
+        <ul class="broken-list" id="brokenSitesList">
+          <li class="empty-item">لا توجد مواقع مبلّغ عنها حالياً.</li>
+        </ul>
+      </div>
+    </main>
+
+    <!-- Footer Reset & Web Converter Shortcut -->
+    <footer class="bottom-bar">
+      <button type="button" class="link-btn" id="resetDefaultsBtn">استعادة الافتراضي</button>
+      <span class="sep-dot">•</span>
+      <span class="tiny-note">خفيفة جداً (~20KB) وتعمل تلقائياً</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

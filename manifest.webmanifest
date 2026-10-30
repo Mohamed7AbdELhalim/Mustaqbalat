@@ -1,0 +1,23 @@
+{
+  "name": "مستقبلات للراحة البصرية | أداة التعتيم ومحول إضافات الويب",
+  "short_name": "مستقبلات",
+  "description": "منصة وأداة ويب خفيفة لتقليل سطوع الشاشة والـ PDF، الوضع الداكن، تلوين HEX، ومراقبة الاستهلاك بدون استهلاك مساحة تخزين.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070D19",
+  "theme_color": "#0F172A",
+  "icons": [
+    {
+      "src": "./extension/icons/icon48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "./extension/icons/icon128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ]
+}

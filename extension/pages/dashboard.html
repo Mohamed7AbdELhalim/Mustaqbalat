@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة إحصائيات الاستهلاك اليومي والأسبوعي — مستقبلات</title>
+  <style>
+    :root {
+      --bg: #070D19;
+      --card: #111A2E;
+      --card-2: #0D1526;
+      --border: rgba(148, 163, 184, 0.16);
+      --text: #F1F5F9;
+      --muted: #94A3B8;
+      --amber: #F59E0B;
+      --sky: #38BDF8;
+      --green: #22C55E;
+      --violet: #A78BFA;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+      min-height: 100vh;
+      padding: 24px 18px 60px;
+      line-height: 1.55;
+    }
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+    }
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-row img { width: 42px; height: 42px; border-radius: 10px; }
+    .brand-row h1 { font-size: 20px; color: #FFF; }
+    .brand-row p { font-size: 13px; color: var(--muted); }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .seg-bar {
+      display: flex;
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 4px;
+    }
+    .seg-bar button {
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .seg-bar button.active {
+      background: var(--amber);
+      color: #090F1D;
+    }
+    .btn {
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 7px 13px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover { border-color: var(--sky); color: var(--sky); }
+    .btn.demo-active {
+      border-color: var(--amber);
+      background: rgba(245, 158, 11, 0.14);
+      color: var(--amber);
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+    }
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .kpi-label { font-size: 12.5px; color: var(--muted); }
+    .kpi-val {
+      font-size: 26px;
+      font-weight: 800;
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .kpi-sub { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 18px;
+    }
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+    .panel-head h2 { font-size: 15.5px; color: #FFF; }
+    .legend {
+      display: flex;
+      gap: 12px;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+    .legend span::before {
+      content: "";
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-left: 5px;
+    }
+    .leg-amber::before { background: var(--amber); }
+    .leg-sky::before { background: var(--sky); }
+    .leg-violet::before { background: var(--violet); }
+    .leg-green::before { background: var(--green); }
+
+    canvas {
+      width: 100%;
+      height: 250px;
+      background: var(--card-2);
+      border-radius: 11px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      font-variant-numeric: tabular-nums;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      background: var(--card-2);
+    }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="brand-row">
+        <img src="../icons/icon48.png" alt="مستقبلات" />
+        <div>
+          <h1>لوحة استهلاك الأداة على مدى الأيام والأسابيع</h1>
+          <p>مراقبة دقيقة لاستهلاك الذاكرة والمعالج ومدة التشغيل عبر الصفحات وملفات PDF</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="seg-bar">
+          <button type="button" class="active" data-horizon="7d">7 أيام</button>
+          <button type="button" data-horizon="14d">14 يوماً</button>
+          <button type="button" data-horizon="4w">4 أسابيع</button>
+          <button type="button" data-horizon="8w">8 أسابيع</button>
+        </div>
+        <button type="button" class="btn" id="toggleDemoDataBtn">✨ محاكاة بيانات أسابيع</button>
+        <button type="button" class="btn" id="exportJsonBtn">⬇ تصدير JSON</button>
+        <button type="button" class="btn" id="clearHistoryBtn">🗑 تصفير السجل</button>
+        <a href="../../index.html" class="btn" id="backStudioLink">🏠 المنصة الرئيسية</a>
+      </div>
+    </header>
+
+    <!-- KPI Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">إجمالي مدة التشغيل الفعلي</div>
+        <div class="kpi-val" style="color:var(--amber);" id="kpiTotalDuration">0 دقيقة</div>
+        <div class="kpi-sub" id="kpiDarkRatio">منها 0 دقيقة في الوضع الداكن</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">متوسط استهلاك الذاكرة بالنظام</div>
+        <div class="kpi-val" style="color:var(--sky);" id="kpiAvgMemory">18 KB</div>
+        <div class="kpi-sub" id="kpiPeakMemory">أقصى ذروة مسجلة: 22 KB | تخزين السجل: 0.4 KB</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">إجمالي زمن معالجة المعالج (CPU)</div>
+        <div class="kpi-val" style="color:var(--green);" id="kpiTotalCpuMs">0.40 ms</div>
+        <div class="kpi-sub">أثر شبه صفري (&lt; 0.01% من موارد النظام)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">الصفحات وملفات PDF المحمية</div>
+        <div class="kpi-val" style="color:var(--violet);" id="kpiTotalPages">1</div>
+        <div class="kpi-sub" id="kpiPdfCount">شاملة 0 ملف PDF و 0 جلسة تلوين HEX</div>
+      </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="charts-grid">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>حجم استهلاك الذاكرة والمعالج في النظام</h2>
+          <div class="legend">
+            <span class="leg-sky">متوسط الذاكرة (KB)</span>
+            <span class="leg-green">زمن المعالجة (ms)</span>
+          </div>
+        </div>
+        <canvas id="resourceChartCanvas" width="520" height="250"></canvas>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>مدة التفعيل اليومية والأسبوعية (دقائق)</h2>
+          <div class="legend">
+            <span class="leg-amber">إجمالي التعتيم</span>
+            <span class="leg-violet">الوضع الداكن وتلوين HEX</span>
+          </div>
+        </div>
+        <canvas id="durationChartCanvas" width="520" height="250"></canvas>
+      </div>
+    </section>
+
+    <!-- Detailed Breakdown Table -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>السجل التفصيلي للاستهلاك حسب الفترة الزمنية</h2>
+        <span style="font-size:12px;color:var(--muted);" id="tableModeSubtitle">عرض يومي لآخر 7 أيام</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>الفترة / التاريخ</th>
+              <th>مدة التفعيل</th>
+              <th>الوضع الداكن</th>
+              <th>تلوين HEX</th>
+              <th>متوسط الذاكرة</th>
+              <th>ذروة الذاكرة</th>
+              <th>زمن CPU الكلي</th>
+              <th>الصفحات / PDF</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="../core/mustaqbalat-engine.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

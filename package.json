@@ -1,0 +1,11 @@
+{
+  "name": "mustaqbalat",
+  "version": "1.0.0",
+  "description": "مستقبلات للراحة البصرية — إضافة متصفح وأداة ويب بدون مساحة لتقليل السطوع، طبقات التعتيم، الوضع الداكن، تلوين HEX، دعم PDF، ومراقبة الاستهلاك.",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node scripts/validate-and-convert.js"
+  }
+}

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مستقبلات للراحة البصرية | محوّل إضافة الويب ومنصة التحكم بالسطوع</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="./extension/icons/icon32.png" />
+  <style>
+    :root {
+      --bg: #070D19;
+      --surface: #111A2E;
+      --surface-2: #0B1324;
+      --border: rgba(148, 163, 184, 0.16);
+      --border-amber: rgba(245, 158, 11, 0.45);
+      --text: #F1F5F9;
+      --muted: #94A3B8;
+      --amber: #F59E0B;
+      --amber-dark: #D97706;
+      --sky: #38BDF8;
+      --green: #22C55E;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 70px;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(11, 19, 36, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 22px;
+    }
+    .nav-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand img { width: 36px; height: 36px; border-radius: 9px; }
+    .brand-title { font-size: 18px; font-weight: 800; color: #FFF; }
+    .brand-tag {
+      font-size: 11px;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--amber);
+      border: 1px solid var(--border-amber);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .btn {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn:hover { border-color: var(--sky); color: var(--sky); }
+    .btn-amber {
+      background: var(--amber);
+      color: #090F1D;
+      border-color: var(--amber);
+      font-weight: 700;
+    }
+    .btn-amber:hover { background: var(--amber-dark); color: #090F1D; }
+
+    .container {
+      max-width: 1240px;
+      margin: 24px auto 0;
+      padding: 0 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+    }
+
+    /* Hero + Live Simulator Layout */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 960px) {
+      .workspace-grid { grid-template-columns: 1fr; }
+    }
+
+    .popup-frame-card {
+      background: var(--surface);
+      border: 1px solid var(--border-amber);
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+    .frame-caption {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 8px 10px;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+    .frame-caption strong { color: var(--amber); }
+    #popupSimulatorIframe {
+      width: 100%;
+      height: 615px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #0B1120;
+      display: block;
+    }
+
+    /* Live Sandbox Webpage & PDF Test Canvas */
+    .sandbox-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .sandbox-header {
+      background: var(--surface-2);
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .sandbox-tabs {
+      display: flex;
+      gap: 6px;
+    }
+    .sb-tab {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .sb-tab.active {
+      background: var(--amber);
+      color: #090F1D;
+      border-color: var(--amber);
+    }
+
+    .bright-demo-page {
+      position: relative;
+      background: #FFFFFF;
+      color: #0F172A;
+      padding: 28px;
+      min-height: 560px;
+      transition: filter 120ms ease;
+    }
+    .bright-demo-page h2 { font-size: 22px; color: #0F172A; margin-bottom: 8px; }
+    .bright-demo-page p { color: #334155; font-size: 14.5px; margin-bottom: 14px; }
+    .demo-color-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .d-card {
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid #E2E8F0;
+    }
+    .d-card.white { background: #F8FAFC; }
+    .d-card.blue { background: #EFF6FF; border-color: #BFDBFE; color: #1E3A8A; }
+    .d-card.amber { background: #FFFBEB; border-color: #FDE68A; color: #78350F; }
+    .demo-photo-box {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 14px;
+    }
+    .demo-svg-photo {
+      width: 120px;
+      height: 82px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Converter Studio Section */
+    .converter-section {
+      background: linear-gradient(145deg, #111A2E 0%, #0B1324 100%);
+      border: 1px solid rgba(56, 189, 248, 0.32);
+      border-radius: 20px;
+      padding: 26px;
+    }
+    .sec-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .sec-head h2 { font-size: 21px; color: #FFF; }
+    .sec-head p { color: var(--muted); font-size: 13.5px; max-width: 780px; }
+    .zero-space-badge {
+      background: rgba(34, 197, 94, 0.14);
+      color: #86EFAC;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .preset-builder-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      background: rgba(7, 13, 25, 0.65);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+    .field label {
+      display: block;
+      font-size: 12px;
+      color: #CBD5E1;
+      margin-bottom: 4px;
+    }
+    .field input, .field select {
+      width: 100%;
+      background: var(--surface);
+      color: #FFF;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .converter-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .conv-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .conv-card h3 { font-size: 16px; color: #FFF; margin-bottom: 4px; }
+    .conv-card p { font-size: 12.5px; color: var(--muted); }
+    .size-pill {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.14);
+      color: var(--sky);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .bookmarklet-drag {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(90deg, #F59E0B, #EA580C);
+      color: #090F1D;
+      font-weight: 800;
+      font-size: 14px;
+      padding: 11px 16px;
+      border-radius: 11px;
+      text-decoration: none;
+      border: 2px dashed rgba(255, 255, 255, 0.55);
+      cursor: grab;
+      text-align: center;
+    }
+    .code-preview {
+      width: 100%;
+      background: #070D19;
+      color: #7DD3FC;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 11px;
+      resize: none;
+      height: 58px;
+    }
+    .file-manifest-box {
+      background: #070D19;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 11.5px;
+      color: var(--muted);
+      max-height: 110px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <div class="brand">
+        <img src="./extension/icons/icon48.png" alt="مستقبلات" />
+        <div>
+          <span class="brand-title">مستقبلات للراحة البصرية</span>
+          <span class="brand-tag">تعمل افتراضياً • خفيفة جداً</span>
+        </div>
+      </div>
+
+      <div class="nav-links">
+        <a href="#converterStudio" class="btn btn-amber">⚡ محوّل إضافة الويب (بدون مساحة)</a>
+        <a href="./extension/pages/pdf-viewer.html" class="btn">📄 معتّم وقارئ PDF الفوري</a>
+        <a href="./extension/pages/dashboard.html" class="btn">📊 لوحة استهلاك الأيام والأسابيع</a>
+        <a href="https://github.com/Mohamed7AbdELhalim/Mustaqbalat/issues" target="_blank" rel="noopener" class="btn">🐙 بلاغات GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Section 1: Live Extension Popup + Live Webpage/PDF Preview -->
+    <section class="workspace-grid">
+      <!-- Real Extension Popup Live -->
+      <div class="popup-frame-card">
+        <div class="frame-caption">
+          <strong>🎛 واجهة الإضافة الحية (تتحكم بالصفحة فوراً)</strong>
+          <span>4 تبويبات متكاملة</span>
+        </div>
+        <iframe id="popupSimulatorIframe" src="./extension/popup/popup.html" title="نافذة إضافة مستقبلات"></iframe>
+      </div>
+
+      <!-- Bright Webpage & PDF Test Stage -->
+      <div class="sandbox-card">
+        <div class="sandbox-header">
+          <div>
+            <strong style="color:#FFF;font-size:14.5px;">معاينة التأثير المباشر على صفحات الويب وملفات PDF</strong>
+            <p style="font-size:12px;color:var(--muted);">لاحظ تغير السطوع، الطبقات، ألوان HEX، الوضع الداكن، ومؤشر الاستهلاك الحي أسفل الصفحة!</p>
+          </div>
+          <div class="sandbox-tabs">
+            <button type="button" class="sb-tab active" data-stage="web">🌐 صفحة ويب ساطعة</button>
+            <button type="button" class="sb-tab" data-stage="pdf">📄 مستند PDF تجريبي</button>
+          </div>
+        </div>
+
+        <!-- Stage A: Bright Webpage -->
+        <div class="bright-demo-page" id="stageWeb">
+          <h2>اختبر راحة عينيك على الصفحات البيضاء والألوان المتنوعة</h2>
+          <p>
+            تم تفعيل محرك <strong>مستقبلات</strong> افتراضياً على هذه الصفحة. حرّك شريط <strong>سطوع الشاشة</strong> لتقليل الإضاءة (حتى 20%) أو زيادتها (حتى 150%)، أو زد <strong>طبقة التعتيم (Overlay Layer)</strong>، أو اختر أي لون من عجلة الألوان وكود <strong>HEX</strong> من اللوحة المجاورة.
+          </p>
+
+          <div class="demo-color-cards">
+            <div class="d-card white">
+              <strong>خلفية بيضاء ناصعة (#FFFFFF)</strong>
+              <p style="font-size:12.5px;margin:4px 0 0;">تخف حدتها فوراً عبر شريط تخفيف وهج الأبيض أو طبقة التعتيم.</p>
+            </div>
+            <div class="d-card blue">
+              <strong>إضاءة زرقاء عالية الطاقة</strong>
+              <p style="font-size:12.5px;margin:4px 0 0;color:#1E40AF;">يمكن تهدئتها بدرجة العنبر الدافئ أو تغيير طيف اللون.</p>
+            </div>
+            <div class="d-card amber">
+              <strong>تباين القراءة الطويلة</strong>
+              <p style="font-size:12.5px;margin:4px 0 0;color:#92400E;">يدعم الوضع الداكن الذكي مع الحفاظ على وضوح النصوص.</p>
+            </div>
+          </div>
+
+          <div class="demo-photo-box">
+            <img
+              class="demo-svg-photo"
+              alt="مشهد طبيعي للاختبار"
+              src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 160'%3E%3Cdefs%3E%3ClinearGradient id='sky' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%2338bdf8'/%3E%3Cstop offset='100%25' stop-color='%23fef08a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='240' height='160' fill='url(%23sky)'/%3E%3Ccircle cx='185' cy='45' r='22' fill='%23f59e0b'/%3E%3Cpolygon points='0,160 65,75 135,160' fill='%2315803d'/%3E%3Cpolygon points='85,160 160,65 240,160' fill='%23166534'/%3E%3C/svg%3E"
+            />
+            <div>
+              <strong style="color:#0F172A;">اختبار حفظ الصور في الوضع الداكن الذكي:</strong>
+              <p style="font-size:13px;margin:4px 0 0;color:#334155;">
+                جرّب اختيار <strong>"داكن ذكي (يحفظ الصور)"</strong> من القائمة — ستتحول الصفحة بالكامل للوضع الداكن المريح مع بقاء الشمس والسماء والجبال في الصورة بألوانها الطبيعية دون انعكاس سلبي!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage B: Inline PDF Simulation + Direct Reader Link -->
+        <div class="bright-demo-page" id="stagePdf" style="display:none;background:#E2E8F0;">
+          <div style="background:#FFF;padding:28px;border-radius:8px;box-shadow:0 8px 25px rgba(0,0,0,0.18);">
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #E2E8F0;padding-bottom:10px;margin-bottom:14px;">
+              <strong style="color:#DC2626;">📄 معاينة طبقة التعتيم على مستند PDF</strong>
+              <a href="./extension/pages/pdf-viewer.html" class="btn btn-amber" style="padding:5px 12px;font-size:12px;">
+                فتح ملف PDF حقيقي من جهازك (0 مساحة) ↗
+              </a>
+            </div>
+            <h2 style="font-size:19px;">الفصل الأول: الفيزيولوجيا البصرية وتأثير الإضاءة الرقمية</h2>
+            <p>
+              تعمل إضافة <strong>مستقبلات</strong> على وضع طبقات تعتيم وتلوين مباشرة فوق عارض ملفات الـ PDF في المتصفح (سواء عبر <code>&lt;embed type="application/pdf"&gt;</code> أو القارئ المدمج)، مما يتيح لك خفض وهج الصفحات البيضاء أو تحويل المستند للوضع الداكن المخصص لملفات PDF بنقرة واحدة.
+            </p>
+            <p style="margin-bottom:0;">
+              لتجربة فتح أي ملف PDF موجود لديك بدون تنزيل أي برامج، اضغط على زر <strong>"فتح ملف PDF حقيقي"</strong> بالأعلى.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Zero-Disk-Space Web Add-on Converter Tool -->
+    <section class="converter-section" id="converterStudio">
+      <div class="sec-head">
+        <div>
+          <h2>⚡ أداة تحويل "مستقبلات" إلى إضافة ويب بدون تنزيل أو استهلاك مساحة</h2>
+          <p>
+            صُممت هذه الأداة خصيصاً للأجهزة ذات المساحة المحدودة جداً: اختر إعداداتك المفضلة بالأسفل، ثم حوّل الأداة فوراً في ذاكرة المتصفح إلى <strong>إضافة ويب سحب وإفلات (0 بايت على القرص)</strong>، أو <strong>سكربت تلقائي لكل المواقع</strong>، أو <strong>حزمة إضافة مضغوطة فائقة الصغر (~38 كيلوبايت فقط)</strong>.
+          </p>
+        </div>
+        <span class="zero-space-badge">✓ يعمل 100% بدون مساحة تخزين</span>
+      </div>
+
+      <!-- Preset Customizer Before Conversion -->
+      <div class="preset-builder-bar">
+        <div class="field">
+          <label for="convBrightness">السطوع الافتراضي عند التشغيل (%)</label>
+          <input type="number" id="convBrightness" min="20" max="150" value="86" />
+        </div>
+        <div class="field">
+          <label for="convOverlay">طبقة التعتيم الافتراضية (%)</label>
+          <input type="number" id="convOverlay" min="0" max="85" value="15" />
+        </div>
+        <div class="field">
+          <label for="convDarkMode">الوضع الداكن الافتراضي</label>
+          <select id="convDarkMode">
+            <option value="off">معطّل (تعتيم مريح فقط)</option>
+            <option value="smart">مفعّل تلقائياً (داكن ذكي)</option>
+            <option value="warm">داكن دافئ للقراءة</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="convHexColor">لون الشاشة المفضل (HEX)</label>
+          <input type="text" id="convHexColor" value="#F59E0B" dir="ltr" />
+        </div>
+      </div>
+
+      <div class="converter-cards">
+        <!-- Option 1: 0-Byte Bookmarklet -->
+        <div class="conv-card">
+          <div>
+            <span class="size-pill">المساحة على الجهاز: 0 بايت (Zero Disk Space)</span>
+            <h3>1. إضافة ويب فورية بالسحب والإفلات (Bookmarklet)</h3>
+            <p>
+              لا تتطلب تنزيل أي ملف إطلاقاً! اسحب الزر البرتقالي أدناه إلى <strong>شريط الإشارات (Bookmarks Bar)</strong> في متصفحك، واضغط عليه في أي موقع لفتح لوحة التعتيم والألوان والـ PDF فوراً.
+            </p>
+          </div>
+
+          <a id="bookmarkletLink" href="#converterStudio" class="bookmarklet-drag" title="اسحب هذا الزر إلى شريط إشارات المتصفح!">
+            🌙 مستقبلات — راحة بصرية
+          </a>
+
+          <textarea id="bookmarkletCodeBox" class="code-preview" dir="ltr" readonly></textarea>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-amber" id="copyBookmarkletBtn" style="flex:1;">📋 نسخ الكود (للهاتف والمتصفح)</button>
+            <button type="button" class="btn" id="testWebWidgetNowBtn">▶ تجربة الأداة المصغّرة هنا</button>
+          </div>
+        </div>
+
+        <!-- Option 2: Auto-Run Userscript (*://*/*) -->
+        <div class="conv-card">
+          <div>
+            <span class="size-pill" id="userscriptSizeBadge">حجم السكربت: ~8.5 كيلوبايت فقط</span>
+            <h3>2. إضافة ويب تلقائية على جميع الصفحات (Userscript)</h3>
+            <p>
+              تعمل تلقائياً وبشكل افتراضي على كل المواقع وملفات الـ PDF فور فتحها عبر مدير السكربتات الخفيف (Violentmonkey / Tampermonkey / Stay للهواتف) دون فك ضغط أي مجلدات.
+            </p>
+          </div>
+
+          <div class="file-manifest-box" dir="ltr">
+            // @match *://*/*<br/>
+            // @match file:///*.pdf<br/>
+            // تشمل: السطوع + الطبقات + الوضع الداكن + HEX + مؤشر الاستهلاك + ربط GitHub
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-amber" id="installUserscriptBtn" style="flex:1;">⚡ توليد وتثبيت .user.js فوراً</button>
+            <button type="button" class="btn" id="copyUserscriptBtn">📋 نسخ السكربت</button>
+          </div>
+        </div>
+
+        <!-- Option 3: Ultra-Tiny In-Memory Browser Extension Packager -->
+        <div class="conv-card">
+          <div>
+            <span class="size-pill" id="zipSizeBadge">الحجم الكامل للحزمة: ~38 كيلوبايت (أصغر من صورة أيقونة!)</span>
+            <h3>3. محوّل حزمة المتصفح المباشر بالذاكرة (Chrome / Edge / Firefox)</h3>
+            <p>
+              يجمع ملفات الإضافة الكاملة داخل ذاكرة المتصفح مباشرة مع إعداداتك المخصصة بصيغة Manifest V3 جاهزة للتحميل بدون أي أدوات بناء.
+            </p>
+          </div>
+
+          <div class="file-manifest-box" id="packageFilesList">
+            جاهز لتوليد الحزمة في الذاكرة المؤقتة (RAM)...
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-amber" id="buildChromeZipBtn" style="flex:1;">📦 تحويل لـ Chrome / Edge / Brave</button>
+            <button type="button" class="btn" id="buildFirefoxZipBtn">🦊 تحويل لـ Firefox</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="./extension/core/mustaqbalat-engine.js"></script>
+  <script src="./converter/web-addon-converter.js"></script>
+  <script src="./studio.js"></script>
+</body>
+</html>

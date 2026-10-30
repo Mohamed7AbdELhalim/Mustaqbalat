@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>معتّم وقارئ ملفات PDF الذكي — مستقبلات</title>
+  <style>
+    :root {
+      --bg: #070D19;
+      --bar: #111A2E;
+      --border: rgba(148, 163, 184, 0.18);
+      --text: #F1F5F9;
+      --muted: #94A3B8;
+      --amber: #F59E0B;
+      --sky: #38BDF8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .pdf-toolbar {
+      background: var(--bar);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 30;
+    }
+    .left-group, .controls-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 14.5px;
+      color: #FFF;
+    }
+    .brand-title img { width: 28px; height: 28px; border-radius: 7px; }
+    .ctrl-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #0B1324;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+    .ctrl-pill input[type="range"] {
+      width: 88px;
+      accent-color: var(--amber);
+      cursor: pointer;
+    }
+    .ctrl-pill select, .ctrl-pill input[type="text"] {
+      background: transparent;
+      color: #FFF;
+      border: none;
+      font-size: 12px;
+      outline: none;
+    }
+    .btn {
+      background: var(--amber);
+      color: #090F1D;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-outline {
+      background: #0B1324;
+      color: var(--sky);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    /* Viewport with dedicated PDF Overlay Layers */
+    .pdf-stage {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      overflow: auto;
+      background: #1E293B;
+      display: flex;
+      justify-content: center;
+    }
+    #pdfEmbedFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+      transition: filter 120ms ease;
+    }
+    /* Sample built-in PDF Document Preview when no file chosen yet */
+    .sample-pdf-sheet {
+      max-width: 780px;
+      width: 92%;
+      margin: 28px auto;
+      background: #FFFFFF;
+      color: #0F172A;
+      padding: 44px 48px;
+      border-radius: 6px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+      transition: filter 120ms ease;
+      line-height: 1.8;
+    }
+    .sample-pdf-sheet h2 { color: #0F172A; margin-bottom: 10px; font-size: 22px; }
+    .sample-pdf-sheet p { margin-bottom: 14px; font-size: 15px; color: #1E293B; }
+    .drop-callout {
+      border: 2px dashed #94A3B8;
+      background: #F8FAFC;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    /* Overlay Layers strictly above PDF */
+    .pdf-overlay-dimmer,
+    .pdf-overlay-tint {
+      position: fixed;
+      top: 54px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      transition: background-color 120ms ease;
+    }
+    .pdf-overlay-dimmer { z-index: 20; }
+    .pdf-overlay-tint { z-index: 21; }
+  </style>
+</head>
+<body>
+  <header class="pdf-toolbar">
+    <div class="left-group">
+      <div class="brand-title">
+        <img src="../icons/icon32.png" alt="مستقبلات" />
+        <span>معتّم ملفات PDF الذكي</span>
+      </div>
+      <label class="btn" style="cursor:pointer;">
+        📂 فتح ملف PDF من جهازك (في الذاكرة 0MB تخزين)
+        <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" hidden />
+      </label>
+      <div class="ctrl-pill">
+        <input type="text" id="pdfUrlInput" dir="ltr" placeholder="أو الصق رابط ملف PDF..." style="width:170px;" />
+        <button type="button" class="btn btn-outline" id="loadPdfUrlBtn" style="padding:3px 8px;">فتح</button>
+      </div>
+    </div>
+
+    <div class="controls-group">
+      <div class="ctrl-pill">
+        <span>السطوع:</span>
+        <input type="range" id="pdfBrightnessRange" min="20" max="150" value="80" />
+        <strong id="pdfBrightnessVal" style="color:var(--amber);">80%</strong>
+      </div>
+
+      <div class="ctrl-pill">
+        <span>طبقة التعتيم:</span>
+        <input type="range" id="pdfLayerRange" min="0" max="85" value="20" />
+        <strong id="pdfLayerVal" style="color:var(--sky);">20%</strong>
+      </div>
+
+      <div class="ctrl-pill">
+        <span>الوضع:</span>
+        <select id="pdfDarkSelect">
+          <option value="off">ورقي مريح</option>
+          <option value="pdf-dark">وضع داكن كامل للـ PDF</option>
+          <option value="sepia">ورق دافئ (Sepia)</option>
+        </select>
+      </div>
+
+      <div class="ctrl-pill">
+        <span>لون HEX:</span>
+        <input type="color" id="pdfHexPicker" value="#F59E0B" style="width:24px;height:22px;border:none;background:none;cursor:pointer;" />
+        <input type="range" id="pdfTintAlpha" min="0" max="65" value="14" style="width:65px;" />
+      </div>
+
+      <a href="../../index.html" class="btn btn-outline" id="backHomeBtn">🏠 الرئيسية</a>
+    </div>
+  </header>
+
+  <div class="pdf-stage" id="pdfStage">
+    <!-- Sample Built-in Document so user can test PDF dimming immediately -->
+    <article class="sample-pdf-sheet" id="samplePdfSheet">
+      <div class="drop-callout">
+        <strong>📄 اسحب وأفلت أي ملف PDF هنا أو اضغط "فتح ملف PDF من جهازك" بالأعلى</strong>
+        <p style="font-size:13px;color:#475569;margin-top:6px;margin-bottom:0;">
+          تتم قراءة الملف مباشرة داخل ذاكرة المتصفح المؤقتة (RAM) دون رفع الملف لأي خادم ودون استهلاك أي مساحة تخزين على جهازك.
+        </p>
+      </div>
+      <h2>نموذج معاينة مستند PDF — مستقبلات للراحة البصرية</h2>
+      <p>
+        تعاني أغلب ملفات الـ PDF الأكاديمية والكتب الإلكترونية من خلفية بيضاء ناصعة السطوع (<code>#FFFFFF</code>) تسبب إجهاداً بصرياً سريعاً خاصة في الإضاءة المنخفضة أو القراءة الليلية الطويلة.
+      </p>
+      <p>
+        من خلال شريط التحكم بالأعلى (أو من نافذة إضافة <strong>مستقبلات</strong> مباشرة)، يمكنك التحكم بدرجة سطوع المستند بالزيادة أو النقصان، وضع طبقات تعتيم شفافة فوق المستند، تفعيل <strong>الوضع الداكن الخاص بملفات PDF</strong>، أو تطبيق أي درجة لونية مخصصة من لوحة <strong>HEX</strong> لتهدئة وهج الخلفية البيضاء فوراً.
+      </p>
+      <p>
+        جرّب الآن تحريك شريط <strong>السطوع</strong> أو <strong>طبقة التعتيم</strong> أو التبديل إلى <strong>وضع داكن كامل للـ PDF</strong> لملاحظة الفرق البصري الفوري!
+      </p>
+    </article>
+
+    <iframe id="pdfEmbedFrame" title="PDF Document Viewer"></iframe>
+
+    <!-- Dedicated Overlay Layers over the PDF stage -->
+    <div class="pdf-overlay-dimmer" id="pdfOverlayDimmer"></div>
+    <div class="pdf-overlay-tint" id="pdfOverlayTint"></div>
+  </div>
+
+  <script src="pdf-viewer.js"></script>
+</body>
+</html>
