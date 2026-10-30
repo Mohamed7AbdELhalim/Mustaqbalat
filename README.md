@@ -141,12 +141,12 @@ Mustaqbalat/
   </a>
 </p>
 
-- **رابط التواصل عبر موقع قبيلة:** [`https://qabilah.com`](https://qabilah.com)
+- **رابط التواصل عبر موقع قبيلة:** [`https://qabilah.com`]([https://qabilah.com](https://qabilah.com/profile/pixion-arab))
 - **إضافة أو تحديث الشعار الخاص بموقع قبيلة:** جُهّز المسار المباشر `./assets/sponsors/qabilah-logo.svg` لتمكين وضع أو استبدال الشعار الرسمي الخاص بموقع قبيلة في أي وقت بمجرد استبدال الملف في المسار ذاته دون الحاجة لتعديل روابط التوثيق.
 
 ### ج. روابط المشروع والاستفسارات المباشرة
 
-- **مستودع الكود المصدري على GitHub:** [`https://github.com/Mohamed7AbdELhalim/Mustaqbalat`](https://github.com/Mohamed7AbdELhalim/Mustaqbalat)
+- **مستودع الكود المصدري على GitHub:** [`https://github.com/Mohamed7AbdELhalim/Mustaqbalat`](https://github.com/Mohamed7AbdELhalim/Mustaqbalat) (*ملاحظة: لم يتم إضافته بعد...).
 - **تذاكر البلاغات والمواقع غير المتوافقة (GitHub Issues):** [`https://github.com/Mohamed7AbdELhalim/Mustaqbalat/issues`](https://github.com/Mohamed7AbdELhalim/Mustaqbalat/issues)
 - **البريد الإلكتروني الرسمي للتواصل والاستفسارات:** [`algorithm-platforms.figment413@passinbox.com`](mailto:algorithm-platforms.figment413@passinbox.com)
 
